@@ -1,0 +1,138 @@
+﻿@{
+    ViewBag.Title = "Ažuriranje komentara";
+    ViewBag.Name = "PregledKomentara";
+}
+
+@section scripts{
+
+    <script src="~/Binding/ViewModels/KomentariViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.KomentariViewModel();
+
+    ko.applyBindingsWithValidation(viewModel,$("#container")[0], {insertMessages: false, messagesOnModified: false, grouping: {deep: true}});
+}
+
+<div id="container" class="container-fluid" style="display: none; margin-top: 25px;" data-bind="visible: isLoaded">
+    @*<div class="col-md-12">
+            <div class="btn-group btn-group-vertical" role="group" style="min-width: 100px;">
+                <button class="btn btn-default" data-bind="click: function(){ SetViewMode('artikli') }, css: { active: viewMode() == 'artikli' }">Komentari artikala</button>
+                <button class="btn btn-default" data-bind="click: function(){ SetViewMode('korisnici') }, css: { active: viewMode() == 'korisnici'}">Komentari korisnika</button>
+                <button class="btn btn-info" data-bind="click: function(){ GetData() }"><span class="glyphicon glyphicon-refresh"></span></button>
+            </div>
+
+        </div>*@
+    <div class="row">
+        <div class="col-md-12" style="border-bottom: solid 1px; border-color: lightblue; padding: 5px;">
+            <ul class="nav nav-pills">
+                <li role="presentation" data-bind="css: { active: viewMode() == 'artikli' }"><a href="#" data-bind="click: function(){ SetViewMode('artikli') }">Komentari artikla</a></li>
+                <li role="presentation" data-bind="css: { active: viewMode() == 'korisnici'} "><a href="#" data-bind="click: function(){ SetViewMode('korisnici') }">Komentari korisnika</a></li>
+                <li role="presentation" style="float: right;"><a href="#" data-bind="click: function(){ GetData() }"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Osvježi</a></li>
+
+            </ul>
+        </div>
+    </div>
+    
+    <div class="col-md-9 col-md-offset-3" style="padding: 10px;">
+        <div class="row">
+            <div class="col-md-3" style="margin-bottom: 10px; margin-left: -15px;">
+                <select class="form-control" data-bind="options: kategorije,
+                                                        optionsText: 'Naziv',
+                                                        optionsValue: 'Vrijednost',
+                                                        value: isPregledan,
+                                                        event: {change: PregledaniNepregledaniSwitch}"></select>
+            </div>
+        </div>
+        <!--ko if: viewMode() == 'korisnici'-->
+        <div class="row">
+            <!-- ko foreach: komentariKorisnika() -->
+            <div class="col-md-8" style="border: solid 1px; border-color: lightblue; margin-bottom: 5px; ">
+
+                <h6><strong><span data-bind="date: Datum, format: 'DD-MMM-YYYY'"></span> - <span data-bind="text: 'napisao: ' + Posiljalac()"></span> - <a data-bind="click: $root.PrikaziAukciju, text: Aukcija"></a></strong></h6>
+                <div class="col-md-12">
+                    <p>
+                        <em><span style="white-space: pre-wrap;" data-bind="text: TextKomentara"></span></em>
+                    </p>
+                </div>
+                <div class="col-md-12" style="padding-top: 20px;" data-bind="visible: $root.isPregledan() == false">
+                    <p>
+                        <button class="btn btn-xs btn-success" data-bind="click: $root.KomentarKorisnikaPregledan"><span class="glyphicon glyphicon-check"></span>&nbsp;Komentar pregledan</button>
+                        <button class="btn btn-xs btn-danger" data-bind="click: $root.UkloniKomentarKorisnika"><span class="glyphicon glyphicon-remove"></span>&nbsp;Ukloni komentar</button>
+                    </p>
+                </div>
+            </div>
+            <!--/ko-->
+
+            <!--ko if: komentariKorisnika().length > 0  && viewMode() == 'korisnici'-->
+            <div class="col-md-8">
+                <div class="text-center">
+                    <ul class="pagination">
+                        <li data-bind="css: { disabled: $root.prethodnaKorisniciEnabled() == false }, click: function(){ GotoPage(1)} "><a style="min-width: 100px;" href="#"><span></span>Prva</a></li>
+                        <li data-bind="css: { disabled: $root.prethodnaKorisniciEnabled() == false }, click: function(){ PrethodnaKorisniciClick() } "><a href="#"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+                        <li><span data-bind="text: $root.pageKorisnici() + ' od ' + $root.pagesKorisnika()"></span></li>
+                        <li data-bind="css: { disabled: $root.narednaKorisniciEnabled() == false }, click: function(){ NarednaKorisniciClick() }"><a href="#"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+                        <li data-bind="css: { disabled: $root.narednaKorisniciEnabled() == false }, click: function(){ GotoPage($root.pagesKorisnika())}"><a style="min-width: 100px;" href="#"><span></span>Poslednja</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!--/ko-->
+            
+
+            <!--ko if: komentariKorisnika().length < 1  && viewMode() == 'korisnici'-->
+            <div class="col-md-8">
+                <h5>Nema komentara korisnika.</h5>
+            </div>
+            <!--/ko-->
+
+        </div>
+        <!--/ko-->
+
+
+        <!--ko if: viewMode() == 'artikli'-->
+        <div class="row">
+            <!-- ko foreach: komentariArtikala() -->
+            <div class="col-md-8" style="border: solid 1px; border-color: lightblue; margin-bottom: 5px;">
+
+                <h6><strong><span data-bind="date: Datum, format: 'DD-MMM-YYYY'"></span> - <span data-bind="text: 'napisao: ' + Komentator()"></span> - <a data-bind="click: $root.PrikaziAukciju, text: Aukcija"></a></strong></h6>
+                <div class="col-md-12">
+                    <p>
+                        <em><span style="white-space: pre-wrap;" data-bind="text: TextKomentara"></span></em>
+                    </p>
+                </div>
+                <div class="col-md-12" style="padding-top: 20px;" data-bind="visible: $root.isPregledan() == false">
+                    <p>
+                        <button class="btn btn-xs btn-success" data-bind="click: $root.KomentarArtiklaPregledan"><span class="glyphicon glyphicon-check"></span>&nbsp;Komentar pregledan</button>
+                        <button class="btn btn-xs btn-danger" data-bind="click: $root.UkloniKomentarArtikla"><span class="glyphicon glyphicon-remove"></span>&nbsp;Ukloni komentar</button>
+                    </p>
+                </div>
+
+            </div>
+            <!--/ko-->
+        </div>
+
+        <!--ko if: komentariArtikala().length > 0 && viewMode() == 'artikli'-->
+        <div class="col-md-8">
+            <div class="text-center">
+                <ul class="pagination">
+                    <li data-bind="css: { disabled: $root.prethodnaArtikliEnabled() == false }, click: function(){ GotoPage(1)} "><a style="min-width: 100px;" href="#"><span></span>Prva</a></li>
+                    <li data-bind="css: { disabled: $root.prethodnaArtikliEnabled() == false }, click: function(){ PrethodnaArtikliClick() } "><a href="#"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+                    <li><span data-bind="text: $root.pageArtikli() + ' od ' + $root.pagesArtikla()"></span></li>
+                    <li data-bind="css: { disabled: $root.narednaArtikliEnabled() == false }, click: function(){ NarednaArtikliClick() }"><a href="#"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+                    <li data-bind="css: { disabled: $root.narednaArtikliEnabled() == false }, click: function(){ GotoPage($root.pagesArtikla())}"><a style="min-width: 100px;" href="#"><span></span>Poslednja</a></li>
+                </ul>
+            </div>
+        </div>
+        <!--/ko-->
+
+        <!--/ko-->
+        <!--ko if: komentariArtikala().length < 1 && viewMode() == 'artikli'-->
+        <div class="col-md-8">
+            <h5>Nema komentara artikala.</h5>
+        </div>
+        <!--/ko-->
+    </div>
+</div>

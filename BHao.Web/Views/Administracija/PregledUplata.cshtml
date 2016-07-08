@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "Pregled uplata";
+    ViewBag.Name = "PregledUplata";
+}
+
+@section scripts{
+
+    <script src="~/Binding/ViewModels/PregledUplataViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.PregledUplataViewModel();
+    ko.applyBindingsWithValidation(viewModel,$("#container")[0], {insertMessages: false, messagesOnModified: false, grouping: {deep: true}});
+}
+
+<div id="container" class="container-fluid" style="margin-top: 25px; display: none;" data-bind="visible: isLoaded">
+    <div class="row">
+        <div class="col-md-12" style="border-bottom: solid 1px; border-color: lightblue; padding: 5px;">
+            <ul class="nav nav-pills">
+                <li role="presentation" data-bind="css: { active: dataMode() == 'neplacene' }"><a href="#" data-bind="click: function(){ GetData('neplacene') }">Neplaćene</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == 'placene' } "><a href="#" data-bind="click: function(){ GetData('placene') }">Plaćene</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == 'sve' } "><a href="#" data-bind="click: function(){ GetData('sve') }">Sve</a></li>
+                <li role="presentation" style="float: right;"><a href="#" data-bind="click: function(){ GetData(dataMode()) }"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Osvježi</a></li>
+
+            </ul>
+        </div>
+        @*<div class="col-md-8">
+            <div class="btn-group">
+                <button class="btn btn-default" data-bind="click: function() { GetData('neplacene') }, css: { active: dataMode() == 'neplacene' }">Neplaćene</button>
+                <button class="btn btn-default" data-bind="click: function() { GetData('placene') }, css: { active: dataMode() == 'placene' }">Plaćene</button>
+                <button class="btn btn-default" data-bind="click: function() { GetData('sve') }, css: { active: dataMode() == 'sve' }">Sve</button>
+            </div>
+        </div>*@
+        <div class="col-md-12" style="padding-top: 10px;">
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control  pull-right" placeholder="Pretraga po broj aukcije, naziv, model, proizvodjač" width="300" data-bind="value: stringZaPretragu, valueUpdate: 'afterkeydown', enterkey: Pretraga" />
+                <div class="input-group-btn">
+                    <button class="btn btn-default" data-bind="click: Pretraga"><span class="glyphicon glyphicon-search"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 15px;">
+        <div class="col-md-12">
+            <div class="text-right">
+                <span data-bind="text: 'Ukupno ' + brojAukcija() + ' aukcija'"></span>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <table id="aukcije" class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Broj aukcije</th>
+                        <th>Artikal</th>
+                        <th>Datum završetka</th>
+                        <th>Prodavac</th>
+                        <th>Kupac</th>
+                        <th>Cijena<br /> (KM)</th>
+                        <th>Provizija<br /> (KM)</th>
+                        <th>Datum uplate provizije <br /></th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    <!-- ko foreach: aukcije-->
+                    <tr>
+                        <td><span data-bind="text: Aukcija.Id()"></span></td>
+                        <td><span data-bind="text: Artikal.Naziv() + ' ' + Artikal.Proizvodjac() + ' ' + Artikal.Model()"></span></td>
+                        <td align="center"><span data-bind="date: Aukcija.Zavrsetak(), format: 'DD-MMM-YYYY'"></span></td>
+                        <td><span data-bind="text: Prodavac.KorisnickoIme()"></span></td>
+                        <td><span data-bind="text: Kupac.KorisnickoIme()"></span></td>
+                        <td align="right"><span data-bind="text: Aukcija.NajvecaPonuda().toLocaleString()"></span></td>
+                        <td align="right"><span data-bind="text: Aukcija.Provizija() > 0 ? Aukcija.Provizija().toLocaleString() : 0"></span></td>
+                        <!-- ko if: $root.editMode() == false || $root.editRow() != Aukcija.Id()-->
+                        <td align="center" data-bind="click:  function(data) { $root.EditMode('izmijeni', data) }" style="cursor: pointer">
+                            <span data-bind="date: Aukcija.DatumPlacanja(), format: 'DD-MMM-YYYY'"></span>
+                            &nbsp;<span class="glyphicon glyphicon-pencil" style="float: right;"></span>
+                        </td>
+                        <!-- /ko -->
+                        <!-- ko if: $root.editMode() == true && $root.editRow() == Aukcija.Id()-->
+                        <td align="center">
+                            <div class="form-group-sm " style="max-width: 250px;">
+                                <div class="input-group input-group-sm">
+                                    @*<input type="text" class="form-control" data-bind="value: $root.unos, enterkey: function(data) { $root.EditMode('sacuvaj', data) }, valueUpdate: 'afterkeydown'" />*@
+                                    <input type="text" class="form-control" readonly="readonly" style="cursor:pointer; background-color: #FFFFFF" data-bind="datepicker: $root.unos, datepickerOptions: { dateFormat: 'd-M-yy' }" />
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-success" data-bind="click: function(data) { $root.EditMode('sacuvaj', data) }"><span class="glyphicon glyphicon-ok "></span></button>
+                                    </div>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-danger" data-bind="click: function(data) { $root.EditMode('otkazi', data) }"><span class="glyphicon glyphicon-remove"></span></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </td>
+                        <!-- /ko -->
+                    </tr>
+                    <!--/ko-->
+                </tbody>
+            </table>
+            <div class="text-center">
+                <ul class="pagination">
+                    <li data-bind="css: { disabled: $root.prethodnaEnabled() == false }, click: function(){ GotoPage(1)} "><a style="min-width: 100px;" href="#"><span></span>Prva</a></li>
+                    <li data-bind="css: { disabled: $root.prethodnaEnabled() == false }, click: PrethodnaClick "><a href="#"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+                    <li><span data-bind="text: $root.page() + ' od ' + $root.pages()"></span></li>
+                    <li data-bind="css: { disabled: $root.narednaEnabled() == false }, click: NarednaClick"><a href="#"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+                    <li data-bind="css: { disabled: $root.narednaEnabled() == false }, click: function(){ GotoPage($root.pages())}"><a style="min-width: 100px;" href="#"><span></span>Poslednja</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

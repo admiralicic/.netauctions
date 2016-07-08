@@ -1,0 +1,95 @@
+﻿@model BHao.Web.Models.AukcijaModel
+
+@{
+    ViewBag.Title = "Kreiraj aukciju";
+    ViewBag.Name = "Kreiraj";
+}
+@section scripts{
+    <script src="~/Scripts/knockout-jqAutocomplete.js"></script>
+    <script src="~/Binding/Models/AukcijaModel.js"></script>
+    <script src="~/Binding/Models/SlikaModel.js"></script>
+    <script src="~/Binding/ViewModels/AukcijaViewModel.js"></script>
+}
+@section ko_apply{
+
+    var viewModel = new BHao.AukcijaViewModel();
+    ko.applyBindingsWithValidation(viewModel,$("#kreiraj")[0], {insertMessages: false, messagesOnModified: false, grouping: {deep: true}});
+
+}
+
+<div id="kreiraj" style="display: none; padding-top: 40px;" data-bind="visible: isLoaded" class="container">
+    @*<h3>Kreirajte aukciju</h3>
+    <hr />*@
+    @Html.Partial("~/Views/Shared/_Validacija.cshtml")
+    <div data-bind="with: aukcijaModel">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label for="naziv">Naziv</label>
+                <input type="text" class="form-control" data-bind="jqAuto: { value: Naziv, source: $root.nazivOptions}" placeholder="Automobil, TV, Telefon, Kamera, ..." id="naziv" />
+            </div>
+            <div class="form-group">
+                <label for="proizvodjac2">Proizvodjač</label>
+                @*<input type="text" class="form-control" data-bind="value: Proizvodjac" placeholder="Naziv proizvođača" id="proizvodjac" />*@
+                <input type="text" class="form-control" data-bind="jqAuto: { value: Proizvodjac, source: $root.proizvodjacOptions }" placeholder="Naziv proizvođača" id="proizvodjac2" />
+            </div>
+            
+            <div class="form-group">
+                <label for="model">Model</label>
+                <input type="text" class="form-control" data-bind="jqAuto: { value: Model, source: $root.modelOptions }" placeholder="Model" id="model" />
+            </div>
+            <div class="form-group">
+                <label for="detaljanOpis">Detaljan opis</label>
+                <textarea rows="5" cols="250" class="form-control" data-bind="value: DetaljanOpis" placeholder="Detaljan opis" id="detaljanOpis"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="kategorija">Kategorija</label>
+                <select class="form-control" data-bind="options: $parent.kategorije,
+                                                        optionsText: 'Naziv',
+                                                        optionsValue: 'Id',
+                                                        value: KategorijaId" id="kategorija"></select>
+            </div>
+            <div class="form-group">
+                <label for="nacinPlacanja">Način plaćanja</label>
+                <select class="form-control" data-bind="options: $parent.naciniPlacanja,
+                                                    optionsText: 'Opis',
+                                                    optionsValue: 'Id',
+                                                    value: NacinPlacanjaId" id="nacinPlacanja"></select>
+            </div>
+
+        </div>
+        <div class="col-md-6">
+
+            <div class="form-group">
+                <label for="minimalnaCijena">Trajanje aukcije (dana)</label>
+                <input type="text" class="form-control" data-bind="value: Trajanje" placeholder="Trajanje aukcije" id="trajanjeAukcije" />
+            </div>
+            <div class="form-group">
+                <label for="minimalnaCijena">Minimalna cijena</label>
+                <input type="text" class="form-control" data-bind="value: MinimalnaCijena" placeholder="Minimalna cijena" id="minimalnaCijena" />
+            </div>
+            <div class="form-group">
+                <label for="kupiOdmah">Kupi odmah cijena</label>
+                <input type="text" class="form-control" data-bind="value: KupiOdmahCijena" placeholder="Kupi odmah cijena" id="kupiOdmah" />
+            </div>
+            <div class="form-group">
+                <label for="napomena">Napomena</label>
+                <textarea rows="5" cols="250" class="form-control" data-bind="value: Napomena" placeholder="Napomena" id="napomena"></textarea>
+            </div>
+            <div class="form-group">
+                <label >Slike</label>
+                <p>
+                    Možete dodati najviše tri slike artikla, najmanje jedna slika je obavezna!
+                </p>
+                <span class="btn btn-default btn-file">
+                    Odaberite slike <span data-bind="text: $parent.slike().length >0 ? ' (odabrano ' + $parent.slike().length + ')' : ''"></span><input type="file" name="fileToUpload" id="fileToUpload" multiple="multiple" data-bind="event: { change: function() { $parent.slikaSelected($element.files) } }, enable: $parent.slike().length < 4" />
+                </span>
+            </div>
+            <div class="form-group">
+                <button type="button" class="btn btn-success" data-bind="click: $parent.kreiraj, visible: $parent.slike().length > 0 && $parent.slike().length < 4">
+                    <span class="glyphicon glyphicon-cloud-upload"></span>&nbsp; Kreiraj aukciju
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+

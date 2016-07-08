@@ -1,0 +1,141 @@
+﻿<Page
+    x:Class="BHao.Client.Mobile.View.AukcijePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BHao.Client.Mobile.View"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    NavigationCacheMode="Required"
+    xmlns:valueconverters="using:BHao.Client.Mobile.Converters"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    DataContext="{Binding DefaultViewModel, RelativeSource={RelativeSource Self}}">
+    
+    <Page.Resources>
+
+        <DataTemplate x:Key="HubSectionHeaderTemplate">
+            <TextBlock Margin="0,0,0,-9.5" Text="{Binding}"/>
+        </DataTemplate>
+
+        <valueconverters:ImagePathConverter x:Key="ImagePathConverter" />
+        <valueconverters:AukcijaToCijenaKonverter x:Key="AukcijaToCijenaKonverter" />
+        <valueconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <valueconverters:InverseBoolConverter x:Key="InverseBoolConverter" />
+        <valueconverters:DateFormatConverter x:Key="DateFormatConverter" />
+
+        <DataTemplate x:Key="Standard200x180TileItemTemplate">
+            <Grid Margin="0,0,9.5,9.5" Background="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}">
+                <StackPanel>
+                    <Image Source="{Binding Slike[0].SlikaThumbIme, Converter={StaticResource ImagePathConverter}}" Stretch="UniformToFill" Height="158.5" Width="158.5"/>
+                    <TextBlock Text="{Binding Artikal.PuniNaziv}" VerticalAlignment="Bottom" Margin="9.5,0,0,0" Style="{ThemeResource ControlHeaderTextBlockStyle}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding Aukcija, Converter={StaticResource AukcijaToCijenaKonverter}}" Margin="9.5,0,0,6.5" Style="{ThemeResource ControlHeaderTextBlockStyle}" Foreground="{ThemeResource PhoneMidBrush}" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StandardTripleLineItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Background="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}" Margin="0,9.5,0,0" Grid.Column="0" HorizontalAlignment="Left">
+                    <Image Source="{Binding Slike[0].SlikaThumbIme, Converter={StaticResource ImagePathConverter}}" Stretch="UniformToFill" AutomationProperties.Name="{Binding Title}" Height="79" Width="79"/>
+                </Border>
+                <StackPanel Grid.Column="1" Margin="14.5,0,0,0">
+                    <TextBlock Text="{Binding Artikal.PuniNaziv}" Style="{ThemeResource ListViewItemTextBlockStyle}"/>
+                    <TextBlock Text="{Binding Aukcija, Converter={StaticResource AukcijaToCijenaKonverter}}" Style="{ThemeResource ListViewItemContentTextBlockStyle}" Foreground="{ThemeResource PhoneMidBrush}" />
+                    <TextBlock Text="{Binding Aukcija.Zavrsetak, Converter={StaticResource DateFormatConverter}}" Style="{ThemeResource ListViewItemSubheaderTextBlockStyle}" />
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+    </Page.Resources>
+    <Page.BottomAppBar>
+        <CommandBar>
+            <CommandBar.SecondaryCommands>
+                <AppBarButton Label="odjava" 
+                              x:Name="OdjavaAppBarButton"
+                              Click="OdjavaAppBarButton_Click"/>
+            </CommandBar.SecondaryCommands>
+            <AppBarButton x:Name="Trazi"
+                          Icon="Find">
+                <AppBarButton.Flyout>
+                    <Flyout Placement="Bottom">
+                        <StackPanel>
+                            <TextBox Name="Pretraga"
+                                     Header="Unesite kriterij pretrage"
+                                     KeyDown="Pretraga_KeyDown"/>
+                            <Button x:Name="Pretrazi" 
+                                    Content="Pretraga"
+                                    Click="Pretrazi_Click"></Button>
+                        </StackPanel>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarButton x:Name="Osvjezi" 
+                          Icon="Refresh" 
+                          Click="Osvjezi_Click"/>
+        </CommandBar>
+    </Page.BottomAppBar>
+
+    <Grid x:Name="LayoutRoot" Background="{ThemeResource AppBarBackgroundThemeBrush}">
+       
+        <Hub x:Name="Hub" x:Uid="Hub" Header="bh aukcije online" >
+            
+            <HubSection x:Name="Tekuce" Header="aukcije u toku" Width="Auto"
+                        DataContext="{Binding AktivneAukcije}" 
+                        HeaderTemplate="{ThemeResource HubSectionHeaderTemplate}">
+                <DataTemplate>
+                    <GridView Margin="0,9.5,0,0" 
+                          ItemsSource="{Binding}"
+                          SelectionMode="None"
+                          IsItemClickEnabled="True"
+                          ItemClick="ItemView_ItemClick"
+                          ItemTemplate="{StaticResource Standard200x180TileItemTemplate}"
+                          ContinuumNavigationTransitionInfo.ExitElementContainer="True">
+                        <GridView.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <ItemsWrapGrid />
+                            </ItemsPanelTemplate>
+                        </GridView.ItemsPanel>
+                    </GridView>
+                </DataTemplate>
+            </HubSection>
+
+            <HubSection x:Name="MojeProdaje" Header="moje prodaje" DataContext="{Binding MojeProdaje}" 
+                        HeaderTemplate="{ThemeResource HubSectionHeaderTemplate}"
+                        >
+                <DataTemplate>
+                            <ListView 
+                            Grid.Row="0"
+                            AutomationProperties.AutomationId="ItemListViewSection3"
+                            SelectionMode="None"
+                            IsItemClickEnabled="True"
+                            ItemsSource="{Binding}"
+                            ItemTemplate="{StaticResource StandardTripleLineItemTemplate}"
+                            ItemClick="ItemView_ItemClick"
+                            ContinuumNavigationTransitionInfo.ExitElementContainer="True">
+                        </ListView>
+                </DataTemplate>
+            </HubSection>
+
+            <HubSection x:Name="MojePonude" Header="moje ponude" DataContext="{Binding MojePonude}" HeaderTemplate="{ThemeResource HubSectionHeaderTemplate}">
+                <DataTemplate>
+                        <ListView 
+                            Grid.Row="0"
+                            AutomationProperties.AutomationId="ItemListViewSection3"
+                            SelectionMode="None"
+                            IsItemClickEnabled="True"
+                            ItemsSource="{Binding}"
+                            ItemTemplate="{StaticResource StandardTripleLineItemTemplate}"
+                            ItemClick="ItemView_ItemClick"
+                            ContinuumNavigationTransitionInfo.ExitElementContainer="True">
+                        </ListView>
+                </DataTemplate>
+            </HubSection>
+        </Hub>
+        <ProgressRing x:Uid="myProgressRing" x:Name="myProgressRing"/>
+    </Grid>
+</Page>

@@ -1,0 +1,242 @@
+﻿@{
+    ViewBag.Title = "Korisnici";
+    ViewBag.Name = "Korisnici";
+}
+
+@section scripts{
+
+    <script src="~/Binding/Models/KorisnikModel.js"></script>
+    <script src="~/Binding/ViewModels/KorisniciViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.KorisniciViewModel();
+
+    ko.applyBindingsWithValidation(viewModel,$("#container")[0],
+    {insertMessages: false, messagesOnModified: false, grouping: {deep: true}});
+}
+
+<div id="container" class="container-fluid" style="margin-top: 25px;" display none;" data-bind="visible: isLoaded">
+    <div data-bind="visible: viewMode() == 'lista', template: { name: 'korisnici-lista-template' }"></div>
+    <!--ko if: selectedKorisnik() -->
+    <div class="row" style="margin-top: 50px;">
+        <div class="col-md-offset-2 col-md-8">
+            <div data-bind="visible: viewMode() == 'izmijeni', template: { name: 'korisnici-izmijeni-template' }"></div>
+            <div data-bind="visible: viewMode() == 'dodaj', template: { name: 'korisnici-dodaj-template' }"></div>
+        </div>
+    </div>
+    <!--/ko-->
+</div>
+
+<script type="text/html" id="korisnici-lista-template">
+    <div class="row">
+        @*<div class="col-md-8">
+                <div class="btn-group">
+                    <button class="btn btn-default" data-bind="click: function() { GetData('uposlenici') }, css: { active: dataMode() == 'uposlenici' }">Uposlenici</button>
+                    <button class="btn btn-default" data-bind="click: function() { GetData('klijenti') }, css: { active: dataMode() == 'klijenti' }">Klijenti</button>
+                </div>
+            </div>*@
+        <div class="col-md-12" style="border-bottom: solid 1px; border-color: lightblue; padding: 5px;">
+            <ul class="nav nav-pills">
+                <li role="presentation" data-bind="css: { active: dataMode() == 'uposlenici' }"><a href="#" data-bind="click: function(){ GetData('uposlenici') }">Uposlenici</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == 'klijenti' } "><a href="#" data-bind="click: function(){ GetData('klijenti') }">Klijenti</a></li>
+                <li role="presentation" style="float: right;"><a href="#" data-bind="click: function(){ GetData(dataMode()) }"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Osvježi</a></li>
+
+            </ul>
+        </div>
+        <div class="col-md-12" style="padding-top: 10px;">
+            <div class="input-group input-group-sm">
+                <input type="text" class="form-control  pull-right" placeholder="Pretraga po ime, prezime, email, korisničko ime" width="300" data-bind="value: filter, valueUpdate: 'afterkeydown', enterkey: Pretraga" />
+                <div class="input-group-btn">
+                    <button class="btn btn-default" data-bind="click: Pretraga"><span class="glyphicon glyphicon-search"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 25px;">
+        <div class="col-md-9 col-md-offset-3">
+            <table id="korisnici" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Email</th>
+                        <th>Puno ime</th>
+                        @*<th>Korisničko ime</th>*@
+                        <th>Onemogućen</th>
+                        <th></th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    <!-- ko foreach: korisnici-->
+                    <tr data-bind="click: function(data){ $root.ViewMode('izmijeni', data) } " style="cursor: pointer;">
+                        <td><span data-bind="text: Id"></span></td>
+                        <td><span data-bind="text: Email"></span></td>
+                        <td><span data-bind="text: Ime() + ' ' + Prezime()"></span></td>
+                        <td><input type="checkbox" class="checkbox" data-bind="checked: IsOnemogucen, enable: false" /></td>
+                        <td align="center"><buton class="btn btn-info btn-xs" data-bind="click: function(data){ $root.ViewMode('izmijeni', data) }"><span class="glyphicon glyphicon-edit"></span>&nbsp;Izmijeni</buton></td>
+                    </tr>
+                    <!--/ko-->
+                </tbody>
+            </table>
+            <button class="btn btn-sm btn-success" data-bind="click: function(){ ViewMode('dodaj') }"><span class="glyphicon glyphicon-plus"></span>&nbsp;Dodaj</button>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="korisnici-dodaj-template">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="inputEmail" class="col-md-2">Email</label>
+                    <div class="col-md-10">
+                        <input type="email" class="form-control" id="inputEmail" placeholder="Email" data-bind="value: selectedKorisnik().Email" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputLozinka" class="col-md-2">Privremena lozinka</label>
+                    <div class="col-md-10">
+                        <input type="password" class="form-control" id="inputLozinka" placeholder="Privremena lozinka" data-bind="value: selectedKorisnik().Lozinka" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputIme" class="col-md-2">Ime</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputIme" placeholder="Ime" data-bind="value: selectedKorisnik().Ime" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPrezime" class="col-md-2">Prezime</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputPrezime" placeholder="Prezime" data-bind="value: selectedKorisnik().Prezime" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputUlica" class="col-md-2">Ulica</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputUlica" placeholder="Ulica" data-bind="value: selectedKorisnik().Ulica" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputBroj" class="col-md-2">Broj</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputBroj" placeholder="Broj" data-bind="value: selectedKorisnik().Broj" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPostanskiBroj" class="col-md-2">Poštanski broj</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputPostanskiBroj" placeholder="Poštanski broj" data-bind="value: selectedKorisnik().PostanskiBroj" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputGrad" class="col-md-2">Grad</label>
+                    <div class="col-md-10">
+                        <select class="form-control" id="inputGrad" data-bind="options: gradovi, value: selectedKorisnik().GradId, optionsText: 'Naziv', optionsValue: 'Id'" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputTelefon" class="col-md-2">Telefon</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputTelefon" placeholder="Telefon" data-bind="value: selectedKorisnik().Telefon" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputIsOnemogucen" class="col-md-2">Onemogućen</label>
+                    <div class="col-md-10">
+                        <input type="checkbox" class="checkbox" id="inputIsOnemogucen" data-bind="checked: selectedKorisnik().IsOnemogucen" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="uloge" class="col-md-2">Uloge</label>
+                    <div class="col-md-10">
+                        <select id="uloge" class="form-control" data-bind="options: uloge, selectedOptions: selectedKorisnik().Uloge" size="3" multiple="true"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-offset-2 col-md-10" data-bind="template: { name: 'korisnici-kontrole-template' }"></div>
+    </div>
+</script>
+
+<script type="text/html" id="korisnici-izmijeni-template">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label for="inputEmail" class="col-md-2">Email</label>
+                    <div class="col-md-10">
+                        <input type="email" class="form-control" id="inputEmail" placeholder="Email" data-bind="value: selectedKorisnik().Email" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputIme" class="col-md-2">Ime</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputIme" placeholder="Ime" data-bind="value: selectedKorisnik().Ime" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPrezime" class="col-md-2">Prezime</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputPrezime" placeholder="Prezime" data-bind="value: selectedKorisnik().Prezime" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputUlica" class="col-md-2">Ulica</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputUlica" placeholder="Ulica" data-bind="value: selectedKorisnik().Ulica" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputBroj" class="col-md-2">Broj</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputBroj" placeholder="Broj" data-bind="value: selectedKorisnik().Broj" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputPostanskiBroj" class="col-md-2">Poštanski broj</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputPostanskiBroj" placeholder="Poštanski broj" data-bind="value: selectedKorisnik().PostanskiBroj" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputGrad" class="col-md-2">Grad</label>
+                    <div class="col-md-10">
+                        <select class="form-control" id="inputGrad" data-bind="options: gradovi, value: selectedKorisnik().GradId, optionsText: 'Naziv', optionsValue: 'Id'" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputTelefon" class="col-md-2">Telefon</label>
+                    <div class="col-md-10">
+                        <input type="text" class="form-control" id="inputTelefon" placeholder="Telefon" data-bind="value: selectedKorisnik().Telefon" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="inputIsOnemogucen" class="col-md-2">Onemogućen</label>
+                    <div class="col-md-10">
+                        <input type="checkbox" class="checkbox" id="inputIsOnemogucen" data-bind="checked: selectedKorisnik().IsOnemogucen" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="uloge" class="col-md-2">Uloge</label>
+                    <div class="col-md-10">
+                        <select id="uloge" class="form-control" data-bind="options: uloge, selectedOptions: selectedKorisnik().Uloge" size="3" multiple="true"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-offset-2 col-md-10" data-bind="template: { name: 'korisnici-kontrole-template' }"></div>
+    </div>
+</script>
+
+<script type="text/html" id="korisnici-kontrole-template">
+    <div>
+        <button class="btn btn-sm btn-success" data-bind="click: function(){ $root.Sacuvaj() }"><span class="glyphicon glyphicon-save"></span>&nbsp;Sačuvaj</button>
+        <button class="btn btn-sm btn-default" data-bind="click: function(){ $root.ViewMode('lista') }"><span class="glyphicon glyphicon-ban-circle"></span>&nbsp;Odustani</button>
+    </div>
+
+</script>
+

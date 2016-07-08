@@ -1,0 +1,5 @@
+﻿<div class="alert alert-danger fade in" data-bind="visible: $root.viewModelHelper.modelIsValid() == false">
+    <ul data-bind="foreach: $root.viewModelHelper.modelErrors">
+        <li data-bind="text: $data"></li>
+    </ul>
+</div>

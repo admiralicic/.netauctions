@@ -1,0 +1,107 @@
+﻿@{
+    ViewBag.Title = "Statistika stranice";
+    ViewBag.Name = "Izvjestaji";
+}
+
+@section scripts{
+
+    <script src="~/Binding/ViewModels/StatistikaViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.StatistikaViewModel();
+
+    ko.applyBindingsWithValidation(viewModel,$("#container")[0], {insertMessages: false, messagesOnModified: false, grouping: {deep: true}});
+}
+
+<div id="container" class="container-fluid" style="display: none; margin-top: 20px;" data-bind="visible: isLoaded">
+    <div style="margin-bottom: 25px;">
+        <h2>Statistički podaci</h2>
+    </div>
+    <div class="row" >
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="datumOd">Datum od:</label>
+                <input type="text" readonly="readonly" style="cursor:pointer; background-color: #FFFFFF" class="form-control" id="datumOd" data-bind="datepicker: prikazOd, datepickerOptions: { dateFormat: 'd-M-yy'}" />
+            </div>
+            <div class="form-group">
+                <label for="datumDo">Datum do:</label>
+                <input type="text" readonly="readonly" style="cursor:pointer; background-color: #FFFFFF" class="form-control" id="datumDo" data-bind="datepicker: prikazDo, datepickerOptions: { dateFormat: 'd-M-yy'}" />
+            </div>
+            <div class="form-group">
+                <label for="kategorija">Kategorija:</label>
+                <select id="kategorija" class="form-control" data-bind="options: kategorije,
+                                                        optionsText: 'Naziv',
+                                                        optionsValue: 'Id',
+                                                        value: odabranaKategorijaId,
+                                                        optionsCaption: 'Sve kategorije'">
+                    >
+                </select>
+            </div>
+            <button class="btn btn-success" data-bind="click: function(){ GetData();}"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Osvježi</button>
+        </div>
+        <div class="col-md-9" style="padding-left: 20px; border-left: solid 1px; border-color: lightblue;">
+            <div class="col-md-6">
+                <h4>Ukupno <span data-bind="text: brojAukcija"></span> aukcija</h4>
+            </div>
+            <div class ="col-md-6">
+                <h4>Prosječna vrijednost aukcije: <span data-bind="text: prosjecnaVrijednostAukcija()"></span> KM</h4>
+            </div>
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#top10" style="outline: 0;" data-toggle="tab">Top 10 artikala</a></li>
+                <li><a href="#aukcije" style="outline: 0;" data-toggle="tab">Aukcije</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade" id="aukcije" style="padding: 20px;">
+                    <!--ko if: listaAukcija()-->
+                    <ul class="list-unstyled" data-bind="foreach: listaAukcija">
+                        <li>
+                            <div class="row">
+                                <div class="col-md-12" style="border-bottom: solid 1px; border-color: lightblue;">
+                                    <h4><span data-bind="text: Artikal.Naziv + ', ' + Artikal.Proizvodjac + ' ' + Artikal.Model"></span></h4>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Početak: <span data-bind="date: Aukcija.Pocetak, format: 'DD-MMM-YYYY HH:mm:ss'"></span></h5>
+                                    <h5>Završetak: <span data-bind="date: Aukcija.Zavrsetak, format: 'DD-MMM-YYYY HH:mm:ss'"></span></h5>
+                                    <h5>Status: <span data-bind="text: Aukcija.Zavrsena == true ? 'Završena' : 'U toku'"></span></h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Prodavac: <span data-bind="text: Prodavac.KorisnickoIme"></span></h5>
+                                    <h5>Kupac: <span data-bind="text: Kupac != null ? Kupac.KorisnickoIme : '-'"></span></h5>
+                                    <h5>Cijena: <span data-bind="text: Aukcija.NajvecaPonuda != null ? Aukcija.NajvecaPonuda.toFixed(2) + ' KM': 'Bez ponuda'"></span></h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5>Iznos provizije: <span data-bind="text: Aukcija.Provizija != null ?Aukcija.Provizija.toFixed() + ' KM' : '-'"></span></h5>
+                                    <h5>Datum plaćanja provizije: <span data-bind="date: Aukcija.DatumPlacanja, format: 'DD-MMM-YYYY'"></span></h5>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <!--/ko-->
+                    <!--ko if: listaAukcija() == null-->
+                    <h5><span>Nema podataka.</span></h5>
+                    <!--/ko-->
+                </div>
+                <div class="tab-pane fade in active" id="top10" style="padding: 20px;">
+                    <!--ko if: najcesceProdavaniArtikli()-->
+                    <ul class="list-unstyled" data-bind="foreach: najcesceProdavaniArtikli">
+                        <li>
+                            <div class="row">
+                                <div class="col-md-5"><h5><span data-bind="text: Artikal"></span></h5></div>
+                                <div class="col-md-2"><h5><span data-bind="text: Count"></span></h5></div>
+                                <div class="col-md-5"></div>
+                            </div>
+
+                        </li>
+                    </ul>
+                    <!--/ko-->
+                    <!--ko if: najcesceProdavaniArtikli() == null-->
+                    <h5><span>Nema podataka.</span></h5>
+                    <!--/ko-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

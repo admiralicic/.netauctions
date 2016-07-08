@@ -1,0 +1,117 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    ViewBag.Title = "Poruke";
+    ViewBag.Name = "Poruke";
+}
+
+@section scripts{
+
+    <script src="~/Binding/Models/PorukaModel.js"></script>
+    <script src="~/Binding/ViewModels/PorukeViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.PorukeViewModel(@User.Identity.GetUserId());
+    ko.applyBindings(viewModel);
+}
+
+<div id="container" class="container-fluid" style="display: none; margin-top: 30px;" data-bind="visible: isLoaded">
+    <div class="row">
+        <div class="col-md-12" style="border-bottom: solid 1px; border-color: lightblue; padding: 5px;">
+            <ul class="nav nav-pills">
+                <li role="presentation" data-bind="css: { active: viewMode() == 'primljene' || (viewMode() == 'detalji' && prethodniViewMode == 'primljene') }"><a href="#" data-bind="click: function(){ GetPrimljene() }"><span data-bind="text: brojNeprocitanihPoruka() > 0 ? 'Primljene (' + brojNeprocitanihPoruka() + ')' : 'Primljene'  "></span></a></li>
+                <li role="presentation" data-bind="css: { active: viewMode() == 'poslane' || (viewMode() == 'detalji' && prethodniViewMode == 'poslane') } "><a href="#" data-bind="click: function(){ GetPoslane() }">Poslane</a></li>
+                <li role="presentation" style="float: right;"><a href="#" data-bind="click: function(){ GetPoruke() }"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Osvježi</a></li>
+            </ul>
+        </div>
+        <div class="col-md-2" style="padding-top: 15px;">
+        </div>
+        <div class="col-md-10">
+            <div class="col-md-12 " style="margin-top: 15px;">
+                <div id="lista" data-bind="visible: $root.viewMode() == 'primljene' || $root.viewMode() == 'poslane'" style="">
+                    <div class="row" style="background-color: lightgray;">
+                        <div class="col-md-3"><h6><strong><span data-bind="text: $root.viewMode() == 'primljene' ? 'Pošiljalac' : 'Primalac'"></span></strong></h6></div>
+                        <div class="col-md-4"><h6><strong><span>Aukcija</span></strong></h6></div>
+                        <div class="col-md-3"><h6><strong><span>Vrijeme</span></strong></h6></div>
+                        <div class="col-md-2"></div>
+                    </div>
+
+                    <div data-bind="foreach: viewMode() == 'primljene' ? primljenePoruke : poslanePoruke" style="cursor: pointer;">
+                        <div class="row" data-bind="click: $root.GetDetalji, css: { neprocitana: Procitana() == false && $root.viewMode() == 'primljene'}" style="border-top: 1px solid; border-color: lightgray; padding-top: 5px; padding-bottom: 5px;">
+                            <div class="col-md-3"><span data-bind="text: $root.viewMode() == 'primljene' ? PosiljalacUserName : PrimalacUserName"></span></div>
+                            <div class="col-md-4"><a data-bind="click: $root.PrikaziAukciju, text: AukcijaPredmet" title="Detaljnije o aukciji"></a></div>
+                            <div class="col-md-3"><span data-bind="date: Datum, format: 'DD MMM YYYY HH:mm:ss'"></span></div>
+                            <div class="col-md-2">
+                                <button style="float:right;" class="btn btn-danger btn-xs" data-bind="click: $root.ObrisiPoruku"><span class="glyphicon glyphicon-trash"></span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--ko if: viewMode() == 'detalji' || viewMode() == 'odgovor'-->
+            <div id="detalj" class="col-md-10" style="margin-top: 10px; border: solid 1px; border-color: lightgray; padding: 10px; ">
+
+               @* <div class="col-md-12">*@
+                    <div class="col-md-12" style="margin-bottom: 10px; border-bottom: solid 1px; border-color: lightblue; padding-bottom: 10px;">
+                        @*<!--ko if: poruka -->
+                        <button class="btn btn-sm " data-bind="click: $root.Odgovori, visible: poruka.PosiljalacId() != prijavljeniKorisnikId()"><span class="glyphicon glyphicon-share-alt"></span>&nbsp;Odgovori</button>
+                        <!--/ko-->
+                        <button class="btn btn-sm btn-danger" data-bind="click: $root.ObrisiPoruku"><span class="glyphicon glyphicon-trash"></span>&nbsp;Obriši</button>*@
+
+                        <button class="btn btn-sm" data-bind="click: $root.PrikaziListu" style="float: right;"><span class="glyphicon glyphicon-remove"></span></button>
+                    </div>
+                    <div class="col-md-8" style="margin-bottom: 5px; "><h4><strong><span data-bind="text: poruka.AukcijaPredmet()"></span></strong></h4></div>
+                    <div class="col-md-4 text-right">
+                        <!--ko if: poruka -->
+                        <button class="btn btn-sm " data-bind="click: $root.Odgovori, visible: poruka.PosiljalacId() != prijavljeniKorisnikId()"><span class="glyphicon glyphicon-share-alt"></span>&nbsp;Odgovori</button>
+                        <!--/ko-->
+                        <button class="btn btn-sm btn-danger" data-bind="click: $root.ObrisiPoruku"><span class="glyphicon glyphicon-trash"></span>&nbsp;Obriši</button>
+
+                    </div>
+                    <div class="col-md-12" style="padding-bottom: 10px; border-bottom: solid 1px; border-color: lightblue;">
+                        <strong><em><span style="color: #337AB7; font-size: 14px;" data-bind="text: prethodniViewMode == 'primljene' ? poruka.PosiljalacUserName() : poruka.PrimalacUserName()"></span></em></strong><br />
+                        <span data-bind="date: poruka.Datum(), format: 'DD MMM YYYY HH:mm:ss'"></span>
+                    </div>
+                    <!--ko if: viewMode() == 'odgovor'-->
+                    <div class="col-md-12" id="editor" style="margin-top: 20px; ">
+                        @*<div class="col-md-10">*@
+
+                            <div class="col-md-12">
+                                <textarea rows="5" class="form-control" data-bind="value: textOdgovora" style="min-width: 100%;"></textarea>
+                            </div>
+                            <div class="col-md-12" style="margin-top: 15px;">
+                                <button class="btn btn-sm btn-success" data-bind="click: $root.Posalji"><span class="glyphicon glyphicon-send"></span>&nbsp;Pošalji</button>
+                                <button class="btn btn-sm btn-default" data-bind="click: $root.Odustani">Odustani</button>
+                            </div>
+                        @*</div>*@
+
+                    </div>
+                    <!--/ko-->
+                    <div class="col-md-12" style="padding: 20px;">
+                        <span data-bind="html: poruka.TextPoruke()"></span>
+                    </div>
+                @*</div>*@
+
+            </div>
+            <!--/ko-->
+           @* <!--ko if: viewMode() == 'odgovor'-->
+    <div id="editor" style="margin-top: 20px; ">
+        <div class="col-md-10">
+
+            <div class="col-md-12">
+                <textarea rows="5" class="form-control" data-bind="value: textOdgovora" style="min-width: 100%;"></textarea>
+            </div>
+            <div class="col-md-12" style="margin-top: 15px;">
+                <button class="btn btn-sm btn-success" data-bind="click: $root.Posalji"><span class="glyphicon glyphicon-send"></span>&nbsp;Pošalji</button>
+                <button class="btn btn-sm btn-default" data-bind="click: $root.Odustani">Odustani</button>
+            </div>
+        </div>
+
+    </div>
+    <!--/ko-->*@
+            </div>
+        </div>
+    </div>

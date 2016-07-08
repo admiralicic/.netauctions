@@ -1,0 +1,157 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+    
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 680px;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+.table {
+    font-size: 12px 
+}
+
+a:hover {
+ cursor:pointer;
+}
+.row-top-buffer {
+    margin-top: 15px;
+}
+
+.navbar-default {
+  background-color: #FECB00; /* background color will be black for all browsers */  
+  border-color: #FECB00;
+  background-image: none;
+  background-repeat: no-repeat;
+  filter: none;
+}
+
+.navbar-inverse {
+  background-color: #002395; /* background color will be black for all browsers */ 
+  border-color: #002395; 
+  background-image: none;
+  background-repeat: no-repeat;
+  filter: none;
+}
+
+.navbar-inverse .navbar-text{
+    color: white;
+}
+
+.paddedClass {
+    margin:5px;
+    padding:5px;
+}
+
+.neprocitana {
+    font-weight: bold;
+    border-color: lightblue;
+    font-style: italic;
+}
+
+.nowrap {
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space: nowrap;
+}
+
+.prosjecnaOcjena{
+    font-weight: bold;
+    color: orange;
+    font-style: italic;
+    font-size: large;
+}
+
+
+
+/*.ui-autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  float: left;
+  display: none;
+  min-width: 160px;
+  _width: 160px;
+  padding: 4px 0;
+  margin: 2px 0 0 0;
+  list-style: none;
+  background-color: #ffffff;
+  border-color: #ccc;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding;
+  background-clip: padding-box;
+  *border-right-width: 2px;
+  *border-bottom-width: 2px;
+}
+.ui-autocomplete .ui-menu-item > a.ui-corner-all {
+  display: block;
+  padding: 3px 15px;
+  clear: both;
+  font-weight: normal;
+  line-height: 18px;
+  color: #555555;
+  white-space: nowrap;
+}
+.ui-autocomplete .ui-menu-item > a.ui-corner-all.ui-state-hover, .ui-autocomplete .ui-menu-item > a.ui-corner-all.ui-state-active {
+  color: #ffffff;
+  text-decoration: none;
+  background-color: #0088cc;
+  border-radius: 0px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  background-image: none;
+}*/
+
+
+
+
+
+
+

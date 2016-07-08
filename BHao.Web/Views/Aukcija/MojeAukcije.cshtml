@@ -1,0 +1,101 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    ViewBag.Title = "Moje Aukcije";
+    ViewBag.Name = "MojeAukcije";
+}
+
+@section scripts{
+
+
+    <script src="~/Binding/ViewModels/MojeAukcijeViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.MojeAukcijeViewModel(@User.Identity.GetUserId());
+    ko.applyBindings(viewModel);
+
+}
+
+<div id="container" class="container-fluid" style="display: none; margin-top: 25px;" data-bind="visible: isLoaded">
+    <div class="row">
+        <div class="col-md-12" style="border-bottom: solid 1px; border-color: lightblue; padding: 5px;">
+            <ul class="nav nav-pills">
+                <li role="presentation" data-bind="css: { active: dataMode() == 'prodavac' }"><a href="#" data-bind="click: function(){ GetAukcije('prodavac') }">Moje aukcije</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == 'kupac'} "><a href="#" data-bind="click: function(){ GetAukcije('kupac') }">Moje ponude</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == ''} "><a href="#" data-bind="click: function(){  GetAukcije('') }">Sve</a></li>
+                <li role="presentation" style="float: right;"><a href="#" data-bind="click: function(){ GetAukcije(dataMode()) }"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Osvježi</a></li>
+            </ul>
+        </div>
+        <div class="col-md-12" style="margin-top: 10px;">
+            <div class="text-right">Ukupno (<span data-bind="text: brojAukcija"></span>)</div>
+        </div>
+    </div>
+
+    @Html.Partial("~/Views/Shared/_Validacija.cshtml")
+    <div class="row">
+        <div class="col-md-11 col-md-offset-1">
+            <div id="aukcijeContainer" data-bind="foreach: aukcijeKorisnika">
+                <div class="col-md-6 " style="padding: 15px; ">
+                    <div id="slika" class="col-md-3">
+                        <img class="img-thumbnail" data-bind="attr: { src: BHao.rootPath + 'uploads/' + Slike()[0].SlikaThumbIme()}, click: $root.GetDetalji " alt="Slika ovdje!" style="cursor: pointer; margin: 10px 0 10px 0;" />
+                    </div>
+                    <div id="info" class="col-md-9">
+                        <h3 data-bind="text: Artikal.Proizvodjac() + ' ' + Artikal.Model() , click: $root.GetDetalji" style="cursor: pointer;"></h3>
+                        <div>
+                            Aukcija <span data-bind="text: Aukcija.Zavrsena() ? 'završena ' : 'traje do '"></span><span data-bind="date: Aukcija.Zavrsetak(), format: 'DD-MMM-YYYY HH:mm:ss'"></span>
+                        </div>
+                        <div data-bind="if: Prodavac">
+                            <span data-bind="text: $root.korisnikId() == Prodavac.Id() ? '' : 'Prodavac ' + Prodavac.KorisnickoIme()"></span>
+                        </div>
+                        <div>
+                            <span data-bind="text: Aukcija.NajvecaPonuda() != null ? 'Najveca ponuda ' + Aukcija.NajvecaPonuda().toFixed(2) + ' KM.' : 'Nema ponuda.'"></span>
+                            <div data-bind="if: Kupac">
+                                <h4 data-bind="text: $root.korisnikId() == Kupac.Id() ? 'Čestitamo, vi ste pobjednik aukcije!' : 'Kupac ' + Kupac.KorisnickoIme()"></h4> @*po cijeni od <span data-bind="text: Aukcija.NajvecaPonuda().toFixed(2)"></span> KM.*@
+                                <!--ko if: $root.korisnikId() == Prodavac.Id() && !$root.isPorukaMode()-->
+                                <div style="margin-top: 10px;">
+                                    <button class="btn btn-xs btn-info" data-bind="click: $root.TogglePorukaMode">
+                                        <span class="glyphicon glyphicon-envelope"></span>&nbsp;Poruka kupcu
+                                    </button>
+                                </div>
+                                <!--/ko-->
+                                <!--ko if: $root.isPorukaMode() == Aukcija.Id()-->
+                                <div style="margin-top: 10px;">
+                                    <textarea rows="10" class="form-control" data-bind="value: $root.textPoruke"></textarea>
+                                    <div style="margin-top:5px;">
+                                        <button class="btn btn-xs btn-success" data-bind="click: $root.PosaljiPoruku">
+                                            <span class="glyphicon glyphicon-send"></span>&nbsp; Pošalji
+                                        </button>
+                                        <button class="btn btn-xs btn-default" data-bind="click: $root.TogglePorukaMode">
+                                            <span></span> Odustani
+                                        </button>
+                                    </div>
+
+                                </div>
+                                <!--/ko-->
+                            </div>
+                        </div>
+                        @*<div>
+                            <button class="btn btn-sm btn-success" data-bind="click: $root.GetDetalji">Detalji aukcije</button>
+                        </div>*@
+                    </div>
+                </div>
+                <!-- ko if: $index() % 2 === 1 -->
+                <div class="clearfix"></div>
+                <!-- /ko -->
+            </div>
+        </div>
+        <div class="text-center">
+            <ul class="pagination">
+                <li data-bind="css: { disabled: $root.prethodnaEnabled() == false }, click: function(){ GotoPage(1)} "><a style="min-width: 100px;" href="#"><span></span>Prva</a></li>
+                <li data-bind="css: { disabled: $root.prethodnaEnabled() == false }, click: PrethodnaClick "><a href="#"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+                <li><span data-bind="text: $root.page() + ' od ' + $root.pages()"></span></li>
+                <li data-bind="css: { disabled: $root.narednaEnabled() == false }, click: NarednaClick"><a href="#"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+                <li data-bind="css: { disabled: $root.narednaEnabled() == false }, click: function(){ GotoPage($root.pages())}"><a style="min-width: 100px;" href="#"><span></span>Poslednja</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,162 @@
+﻿@{
+    ViewBag.Title = "Postavke sistema";
+    ViewBag.Name = "Postavke";
+}
+
+@section scripts{
+    <script src="~/Binding/Models/GKModel.js"></script>
+    <script src="~/Binding/Models/InkrementModel.js"></script>
+    <script src="~/Binding/Models/NacinPlacanjaModel.js"></script>
+    <script src="~/Binding/ViewModels/AdministracijaViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.AdministracijaViewModel();
+
+    ko.applyBindingsWithValidation(viewModel,$("#container")[0], {insertMessages: false, messagesOnModified: false, grouping: {deep: true}});
+}
+
+<div id="container" class="container-fluid" style="display: none; margin-top: 25px;" data-bind="visible: isLoaded">
+   
+    <div class="row">
+       
+        <div class="col-md-12" style="border-bottom: solid 1px; border-color: lightblue; padding: 5px;">
+            <ul class="nav nav-pills">
+                <li role="presentation" data-bind="css: { active: dataMode() == 'grad' }"><a href="#" data-bind="click: function(){ $root.GetData('grad') }">Gradovi</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == 'inkrement' } "><a href="#" data-bind="click: function(){ $root.GetData('inkrement') }">Inkrementi</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == 'kategorija' } "><a href="#" data-bind="click: function(){ $root.GetData('kategorija') }">Kategorije</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == 'nacinplacanja' } "><a href="#" data-bind="click: function(){ $root.GetData('nacinplacanja') }">Načini plaćanja</a></li>
+                <li role="presentation" style="float: right;"><a href="#" data-bind="click: function(){ GetData(dataMode()) }"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Osvježi</a></li>
+
+            </ul>
+        </div>
+        <div id="lista" class="col-md-9 col-md-offset-3" style="padding-top: 15px;">
+            @Html.Partial("~/Views/Shared/_Validacija.cshtml")
+
+
+            <div data-bind="visible: (dataMode() == 'grad' || dataMode() == 'kategorija'), template: { name: 'gradovikategorije-template' }"></div>
+            <div data-bind="visible: dataMode() == 'inkrement', template: { name: 'inkrementi-template' }"></div>
+            <div data-bind="visible: dataMode() == 'nacinplacanja', template: { name: 'naciniplacanja-template' }">
+            </div>
+        </div>
+        <div id="dodavanje"></div>
+    </div>
+</div>
+
+<script type="text/html" id="kontrole-template">
+    <button class="btn btn-xs btn-info" data-bind="click: function(data) { $root.EditMode('izmijeni', data)}, visible: $root.editMode() != true || $root.editRow() != Id"><span class="glyphicon glyphicon-edit" style="min-width: 20px;"></span>&nbsp;Izmijeni</button>
+    <button class="btn btn-xs btn-success" data-bind="click: function(){ $root.EditMode('sacuvaj') }, visible:  $root.editMode() && $root.editRow() == Id"><span class="glyphicon glyphicon-save" style="min-width: 20px;"></span>&nbsp;Sačuvaj</button>
+    <button class="btn btn-xs btn-default" data-bind="click: function(){ $root.EditMode('odustani') }, visible:  $root.editMode() && $root.editRow() == Id"><span class="glyphicon glyphicon-ban-circle" style="min-width: 20px;"></span>&nbsp;Odustani</button>
+    <button class="btn btn-xs btn-danger" data-bind="click: function(data){ $root.EditMode('obrisi', data) }, visible: $root.editMode() != true || $root.editRow() != Id" ><span class="glyphicon glyphicon-remove" style="min-width: 20px;"></span>&nbsp;Obriši</button>
+</script>
+
+<script type="text/html" id="gradovikategorije-template">
+    <table class="table table-hover table-striped table-condensed" >
+        <thead>
+            <tr>
+                <th>Naziv</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: podaci">
+            <tr>
+                <td>
+                    <span data-bind="text: Naziv, visible: !$root.editMode() || $root.editRow()!=Id"></span>
+                    <input type="text" class="form-control" data-bind="value: Naziv, visible: $root.editMode() && $root.editRow() == Id" />
+                </td>
+                <td align="right">
+                    <div data-bind="template: { name: 'kontrole-template' }, visible: $root.dodavanjeOmoguceno() == false"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div data-bind="template: { name: 'dodajButton-template' }, visible: $root.dodavanjeOmoguceno() == false"></div>
+    <div data-bind="template: {name: 'dodajGK-template'}, visible: $root.dodavanjeOmoguceno() == true"></div>
+    <div data-bind="template: {name: 'sacuvajButton-template'}, visible: $root.dodavanjeOmoguceno() == true"></div>
+</script>
+
+<script type="text/html" id="inkrementi-template">
+    <table class="table table-hover table-striped table-condensed">
+        <thead>
+            <tr>
+                <th>Cijena</th>
+                <th>Iznos inkrementa</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: podaciInkrementi">
+            <tr>
+                <td>
+                    <span data-bind="text: Cijena, visible: !$root.editMode() || $root.editRow()!=Id"></span>
+                    <input type="text" class="form-control" data-bind="value: Cijena, visible: $root.editMode() && $root.editRow() == Id" />
+                </td>
+                <td>
+                    <span data-bind="text: IznosInkrementa, visible: !$root.editMode() || $root.editRow()!=Id"></span>
+                    <input type="text" class="form-control" data-bind="value: IznosInkrementa, visible: $root.editMode() && $root.editRow() == Id" />
+                </td>
+                <td align="right">
+                    <div data-bind="template: { name: 'kontrole-template' }, visible: $root.dodavanjeOmoguceno() == false"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div data-bind="template: { name: 'dodajButton-template' }, visible: $root.dodavanjeOmoguceno() == false"></div>
+    <div data-bind="template: {name: 'dodajInkrement-template'}, visible: $root.dodavanjeOmoguceno() == true"></div>
+    <div data-bind="template: {name: 'sacuvajButton-template'}, visible: $root.dodavanjeOmoguceno() == true"></div>
+</script>
+
+<script type="text/html" id="naciniplacanja-template">
+    <table class="table table-hover table-striped table-condensed">
+        <thead>
+            <tr>
+                <th>Opis</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: podaciNaciniPlacanja">
+            <tr>
+                <td>
+                    <span data-bind="text: Opis, visible: !$root.editMode() || $root.editRow()!=Id"></span>
+                    <input type="text" class="form-control" data-bind="value: Opis, visible: $root.editMode() && $root.editRow() == Id" />
+                </td>
+                <td align="right">
+                    <div data-bind="template: { name: 'kontrole-template' }, visible: $root.dodavanjeOmoguceno() == false"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div data-bind="template: { name: 'dodajButton-template' }, visible: $root.dodavanjeOmoguceno() == false"></div>
+    <div data-bind="template: {name: 'dodajNP-template'}, visible: $root.dodavanjeOmoguceno() == true"></div>
+    <div data-bind="template: {name: 'sacuvajButton-template'}, visible: $root.dodavanjeOmoguceno() == true"></div>
+</script>
+
+<script type="text/html" id="dodajGK-template">
+            <span >Naziv</span>
+            <input type="text" class="form-control" data-bind="value: $root.gkNaziv" id="naziv"/>
+</script>
+
+<script type="text/html" id="dodajInkrement-template">
+    <span>Cijena</span>
+    <input type="text" class="form-control" data-bind="value: $root.inkrementCijena"/>
+    <span>Iznos inkrementa</span>
+    <input type="text" class="form-control" data-bind="value: $root.inkrementIznos" />
+</script>
+
+<script type="text/html" id="dodajNP-template">
+    <span>Opis</span>
+    <input type="text" class="form-control" data-bind="value: $root.nacinPlacanjaOpis" />
+</script>
+
+<script type="text/html" id="dodajButton-template">
+    <button class="btn btn-sm btn-success" data-bind="click: $root.OmoguciDodavanje, visible:  $root.editMode() == false"><span class="glyphicon glyphicon-plus" style="min-width: 20px;"></span>&nbsp;Dodaj</button>
+</script>
+
+<script type="text/html" id="sacuvajButton-template">
+    <div style="margin-top: 15px;">
+        <button class="btn btn-sm btn-success" data-bind="click: $root.Sacuvaj"><span class="glyphicon glyphicon-plus" style="min-width: 20px;"></span>&nbsp;Sačuvaj</button>
+        <button class="btn btn-sm btn-default" data-bind="click: $root.OnemoguciDodavanje"><span class="glyphicon glyphicon-ban-circle" style="min-width: 20px;"></span>&nbsp;Odustani</button>
+    </div>
+</script>
+

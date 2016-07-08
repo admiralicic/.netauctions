@@ -1,0 +1,329 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    ViewBag.Title = "Detalji";
+}
+
+@section scripts{
+
+    <script src="~/Binding/Models/AukcijaDetailModel.js"></script>
+    <script src="~/Binding/ViewModels/AukcijaDetailViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+
+
+    var viewModel = new BHao.AukcijaDetailViewModel(@User.Identity.GetUserId());
+    ko.applyBindingsWithValidation(viewModel,$("#detalji")[0], {insertMessages: false, messagesOnModified: false, grouping: {deep: true}});
+
+}
+
+
+<div class="container-fluid" id="detalji" style="display: none; margin-top: 20px;" data-bind="visible: isLoaded">
+    <div data-bind="with: Aukcija">
+        <div class="row">
+            <div class="col-md-9">
+
+                <div class="col-md-6">
+                    <div class="col-md-12" style="border: solid 1px; border-color: lightblue;">
+                        <div class="paddedClass">
+                            <img class="img-responsive center-block" data-bind="attr: { src: BHao.rootPath + 'uploads/' + $root.odabranaSlika()}" style="display: block; height: 400px; width: 400px; object-fit: contain"/>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="paddedClass">
+                            <ul class="list-inline" data-bind="foreach: Slike">
+                                <li>
+                                    <img class="img img-responsive" data-bind="attr: { src: BHao.rootPath + 'uploads/' + SlikaThumbIme}, event: {mouseenter: $root.PrikaziSliku}" />
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6" >
+                    <div class="col-md-12">
+                        @Html.Partial("~/Views/Shared/_Validacija.cshtml")
+                        <h3 data-bind="text: NaslovAukcije"></h3>
+
+                        <h5>Prosječna ocjena: <span class="prosjecnaOcjena" data-bind="text: Artikal().ProsjecnaOcjena ? Artikal().ProsjecnaOcjena.toFixed(1) : 'bez ocjene'"></span></h5>
+                        <h5>
+                            Način plaćanja: <strong><span data-bind="text: NacinPlacanja()"></span></strong>
+                        </h5>
+                        <h5>
+                            Trenutna cijena: <strong><span data-bind="text: TrenutnaCijena().toFixed(2)"></span> KM</strong>
+                        </h5>
+                        <div data-bind="visible: Zavrsena() == false">
+                            <h5>Aukcija traje do <strong><span data-bind="date: Zavrsetak(), format: 'DD-MMM-YYYY HH:mm:ss'"></span></strong></h5>
+                        </div>
+                        <div data-bind="visible: Zavrsena() == true">
+                            <h5>Aukcija završena <strong><span data-bind="date: Zavrsetak(), format: 'DD-MMM-YYYY HH:mm:ss'"></span></strong></h5>
+                        </div>
+                    </div>
+                    <div class="col-md-12" data-bind="visible: $root.prijavljeniKorisnikId() != ProdavacId() && $root.prijavljeniKorisnikId() > 0 && Zavrsena() == false && isAdmin() == false" style="margin-top: 10px;">
+                        <div data-bind="visible: $root.unosPonudeEnabled" style="padding: 15px; background-color: lightgray; max-width: 600px;">
+                            <h5>
+                                Unesite iznos vaše najveće ponude:
+                            </h5>
+                            <div class="input-group">
+                                <input type="text" class="form-control" data-bind="value: $root.iznosPonude, valueUpdate: 'afterkeydown'" />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-success" type="button" data-bind="click: $root.KreirajPonudu, enable: $root.iznosPonude() > 0">Ponudite!</button>
+                                </span>
+                            </div>
+                            <div data-bind="visible: $root.omoguciKupiOdmah()" style="margin-top: 10px;">
+                                <button class="btn btn-lg btn-danger" data-bind="click: $root.KupiOdmah">Kupite odmah za <span data-bind="text: KupiOdmahCijena().toFixed(2)"></span> KM!</button>
+                            </div>
+                        </div>
+                        <div style="background-color: lightgreen; padding: 10px;" data-bind="visible: $root.isPrijavljeniKorisnikPobjednik()==true">
+                            <div data-bind="visible: $root.isPrijavljeniKorisnikPobjednik() == true && Zavrsena() == false">
+                                <h4>Vaša ponuda od <span data-bind="text: TrenutnaCijena()"></span> KM, je najveća! Vaša krajnja ponuda je <span data-bind="text: NajvecaPonuda() ? NajvecaPonuda().MaksimalanIznos.toFixed(2) : 0"></span> KM.</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="viseoPonudi" class="col-md-12" style="margin-top: 20px;">
+                        <div>
+                            <h5><strong>Detaljnije o artiklu: </strong></h5><span style="white-space: pre-wrap;" data-bind="text: DetaljanOpis()"></span>
+                        </div>
+                        <div data-bind="visible: Napomena() != null " style="margin-top: 15px;">
+                            <h5><strong>Napomena: </strong></h5><span style="white-space: pre-wrap;" data-bind="text: Napomena()"></span>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-md-12" style="margin-bottom: 20px;">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a style="outline: 0;" data-toggle="tab" href="#komentariArtikla">Komentari artikla</a></li>
+                        <li><a style="outline: 0;" data-toggle="tab" href="#komentariProdavca">Komentari prodavca</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="komentariArtikla" class="tab-pane fade in active">
+                            <!--ko if: Artikal().Komentari.length > 0-->
+                            <ul class="list-unstyled" data-bind="foreach: Artikal().Komentari">
+                                <li>
+                                    <div>
+                                        <hr />
+                                        <h6><strong><span data-bind="date: Datum, format: 'DD-MM-YYYY'"></span> - <span data-bind="text: Komentator"></span></strong></h6>
+                                        <p>
+                                            <em><span style="white-space: pre-wrap;" data-bind="text: TextKomentara"></span></em>
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                            <!--/ko-->
+                            <!--ko if: Artikal().Komentari.length < 1-->
+                            <div style="margin-top: 20px;">
+                                <h5>Trenutno nema komentara.</h5>
+                            </div>
+                            <!--/ko-->
+                        </div>
+                        <div id="komentariProdavca" class="tab-pane fade">
+                            <!--ko if: Prodavac().KomentariKorisnika.length > 0-->
+                            <ul class="list-unstyled" data-bind="foreach: Prodavac().KomentariKorisnika">
+                                <li>
+                                    <div>
+                                        <hr />
+                                        <h6><strong><span data-bind="date: Datum, format: 'DD-MM-YYYY'"></span> - <span data-bind="text: Posiljalac"></span></strong></h6>
+                                        <p>
+                                            <em><span style="white-space: pre-wrap;" data-bind="text: TextKomentara"></span></em>
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                            <!--/ko-->
+                            <!--ko if: Prodavac().KomentariKorisnika.length < 1-->
+                            <div style="margin-top: 20px;">
+                                <h5>Trenutno nema komentara.</h5>
+                            </div>
+                            <!--/ko-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+
+                <div class="col-md-12" style="border: solid 1px; border-color: lightblue; padding-top: 10px; ">
+
+                    <div>
+                        <div>Prodavac: <span data-bind="text: Prodavac().KorisnickoIme" style="float:right;"></span></div>
+                        <!--ko if: $root.isUcesnik() && $root.isPorukaMode() == false -->
+                        <div style="padding-bottom: 10px; float: right;">
+                            <button class="btn btn-xs btn-info" data-bind="click: $root.TogglePorukaMode">
+                                <span class="glyphicon glyphicon-envelope"></span>&nbsp;Poruka prodavcu
+                            </button>
+                        </div>
+                        <!--/ko-->
+                        <div>Prosječna ocjena: <span class="prosjecnaOcjena" data-bind="text: Prodavac().ProsjecnaOcjena ? Prodavac().ProsjecnaOcjena.toFixed(1) : 'bez ocjene'"></span></div>
+                        <!--ko if: $root.isPorukaMode()-->
+                        <div style="padding-bottom: 10px;">
+                            <textarea class="form-control" rows="10" data-bind="value: $root.textPoruke"></textarea>
+                            <div style="margin-top: 5px;">
+                                <button class="btn btn-sm btn-success" data-bind="click: $root.PosaljiPoruku">
+                                    <span class="glyphicon glyphicon-send"></span>&nbsp; Pošalji
+                                </button>
+                                <button class="btn btn-sm btn-default" data-bind="click: $root.OtkaziPoruku">
+                                    <span class="glyphicon"></span>&nbsp;Odustani
+                                </button>
+                            </div>
+
+                        </div>
+                        <!--/ko-->
+                    </div>
+                    <!--ko if: NajveciPonudjac()-->
+                    <div>
+                        <div data-bind="if: $root.prijavljeniKorisnikId() == Prodavac().Id && Zavrsena() == true">
+                            <div>Kupac: <span data-bind="text: NajveciPonudjac().KorisnickoIme" style="float: right;"></span></div>
+
+                        </div>
+                    </div>
+                    <!--/ko-->
+                </div>
+                <div class="col-md-12" style="border: solid 1px; border-color: lightblue; margin-top: 10px; padding-bottom: 15px;" data-bind="visible: Ponude().length > 0">
+                    <div style="text-align: center; margin: 5px 0 10px 0;">
+                        <span><strong>Top 10 ponuda:</strong></span>
+                    </div>
+                    <div id="pregledPonuda" data-bind="foreach: Ponude()">
+                        <!--ko if: $index() < 10 -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div style="float: left; ">
+                                    <span data-bind="text: KorisnikIme"></span>
+                                </div>
+                                <div style="float:right; ">
+                                    <span data-bind="text: Iznos.toFixed(2) + ' KM'"></span>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!--/ko-->
+                    </div>
+                </div>
+                <div class="col-md-12" style="border: solid 1px; border-color: lightblue; margin-top: 10px;" data-bind="visible: Zavrsena() == true && NajveciPonudjac() != null">
+                    <div data-bind="visible: $root.isPrijavljeniKorisnikPobjednik() == true && Zavrsena() == true">
+                        <h4>
+                            Čestitamo! Pobjednik ste aukcije. @*<span data-bind=" text nazivartikla()">
+                </span> za  <span data-bind="text: TrenutnaCijena().toFixed(2)"></span> KM!*@
+                        </h4>
+                        <span>
+                            <em>Kontaktirajte prodavca kako bi se dogovorili oko detalja u vezi plaćanja i isporuke.</em>
+                        </span>
+                        <div style="margin-top: 10px;">
+                            <div class="input-group">
+                                <span class="input-group-addon">Ocjena artikla: </span><select class="form-control" data-bind="options: $root.ocjene, optionsCaption: '-', value: $root.ocjenaArtikla, enable: $root.ocjenaArtikla() ? false : true"></select>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-success" data-bind="click: $root.OcijeniArtikal, visible: $root.ocjenaArtiklaButtonVisible() == true">Ocijenite</button>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 10px;" data-bind="visible: $root.isKomentarArtiklaOmogucen">
+                            <div>
+                                <h5><strong>Komentar artikla:</strong></h5>
+                                <textarea class="form-control" rows="10" style="width: 100%;" data-bind="value: $root.textKomentaraArtikla"></textarea>
+                            </div>
+                            <div style="margin: 5px 0 5px 0;">
+                                <button class="btn btn-sm btn-success" data-bind="click: $root.DodajKomentarArtikla">Dodajte komentar</button>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px;" data-bind="visible: $root.isKomentarArtiklaOmogucen() == false && $root.textKomentaraArtikla()">
+                            <h5><strong>Komentar artikla:</strong></h5>
+                            <em><span data-bind="text: $root.textKomentaraArtikla"></span></em>
+                        </div>
+                        <div style="margin-top: 20px;" data-bind="visible: $root.ocjenaProdavcaEnabled">
+                            <div class="input-group">
+                                <span class="input-group-addon">Ocjena prodavca:</span><select class="form-control" data-bind="options: $root.ocjene, value: $root.ocjenaProdavca, optionsCaption: '-', enable: $root.ocjenaProdavca() ? false : true"></select>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-success" data-bind="click: $root.OcijeniKorisnika, visible: $root.ocjenaProdavcaButtonVisible() == true">Ocijenite</button>
+                                </span>
+
+                            </div>
+                        </div>
+                        @*<div data-bind="visible: $root.ocjenaKupcaEnabled" style="margin-top: 20px;">
+                <div class=" input-group">
+                    <span class="input-group-addon">Ocjena kupca:</span><select class="form-control" data-bind="options: $root.ocjene, value: $root.ocjenaKupca, optionsCaption: '-', enable: $root.ocjenaKupca() ? false : true"></select>
+                    <span class="input-group-btn">
+                        <button class="btn btn-success" data-bind="click: $root.OcijeniKorisnika, visible: $root.ocjenaKupcaButtonVisible() == true">Ocijenite</button>
+                    </span>
+                </div>
+            </div>*@
+                        @*<div style="margin-top: 10px;">
+                            <div data-bind="visible: $root.isKomentarOmogucen">
+                                <div>
+                                    <h5><strong><span data-bind="text: $root.isPrijavljeniKorisnikPobjednik() ? 'Komentar prodavca: ' : 'Komentar kupca: '"></span></strong></h5>
+                                    <textarea class="form-control" rows="10" style="width: 100%;" data-bind="value: $root.textKomentara"></textarea>
+                                </div>
+                                <div style="margin: 5px 0 5px 0;">
+                                    <button class="btn btn-sm btn-success" data-bind="click: $root.DodajKomentar">Dodajte komentar</button>
+                                </div>
+                            </div>
+                            <div data-bind="visible: $root.isKomentarOmogucen() == false && $root.textKomentara()">
+                                <h5><strong><span data-bind="text: $root.isPrijavljeniKorisnikPobjednik() ? 'Komentar prodavca: ' : 'Komentar kupca: '"></span></strong></h5>
+                                <em><span data-bind="text: $root.textKomentara"></span></em>
+                            </div>
+                        </div>*@
+                    </div>
+                    <div data-bind="visible: $root.ocjenaKupcaEnabled" >
+                        <div data-bind="visible: $root.ocjenaKupcaEnabled" style="margin-top: 20px;">
+                            <div class=" input-group">
+                                <span class="input-group-addon">Ocjena kupca:</span><select class="form-control" data-bind="options: $root.ocjene, value: $root.ocjenaKupca, optionsCaption: '-', enable: $root.ocjenaKupca() ? false : true"></select>
+                                <span class="input-group-btn">
+                                    <button class="btn btn-success" data-bind="click: $root.OcijeniKorisnika, visible: $root.ocjenaKupcaButtonVisible() == true">Ocijenite</button>
+                                </span>
+                            </div>
+                        </div>
+                        @*<div style="margin-top: 10px;">
+                            <div data-bind="visible: $root.isKomentarOmogucen">
+                                <div>
+                                    <h5><strong><span data-bind="text: $root.isPrijavljeniKorisnikPobjednik() ? 'Komentar prodavca: ' : 'Komentar kupca: '"></span></strong></h5>
+                                    <textarea class="form-control" rows="10" style="width: 100%;" data-bind="value: $root.textKomentara"></textarea>
+                                </div>
+                                <div style="margin: 5px 0 5px 0;">
+                                    <button class="btn btn-sm btn-success" data-bind="click: $root.DodajKomentar">Dodajte komentar</button>
+                                </div>
+                            </div>
+                            <div data-bind="visible: $root.isKomentarOmogucen() == false && $root.textKomentara()">
+                                <h5><strong><span data-bind="text: $root.isPrijavljeniKorisnikPobjednik() ? 'Komentar prodavca: ' : 'Komentar kupca: '"></span></strong></h5>
+                                <em><span data-bind="text: $root.textKomentara"></span></em>
+                            </div>
+                        </div>*@
+                    </div>
+                    <div data-bind="visible: ($root.ocjenaKupcaEnabled() == true || $root.ocjenaProdavcaEnabled() == true)">
+                        <div style="margin-top: 10px;">
+                            <div data-bind="visible: $root.isKomentarOmogucen">
+                                <div>
+                                    <h5><strong><span data-bind="text: $root.isPrijavljeniKorisnikPobjednik() ? 'Komentar prodavca: ' : 'Komentar kupca: '"></span></strong></h5>
+                                    <textarea class="form-control" rows="10" style="width: 100%;" data-bind="value: $root.textKomentara"></textarea>
+                                </div>
+                                <div style="margin: 5px 0 5px 0;">
+                                    <button class="btn btn-sm btn-success" data-bind="click: $root.DodajKomentar">Dodajte komentar</button>
+                                </div>
+                            </div>
+                            <div data-bind="visible: $root.isKomentarOmogucen() == false && $root.textKomentara()">
+                                <h5><strong><span data-bind="text: $root.isPrijavljeniKorisnikPobjednik() ? 'Komentar prodavca: ' : 'Komentar kupca: '"></span></strong></h5>
+                                <em><span data-bind="text: $root.textKomentara"></span></em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <!--ko if: $root.preporuke().length > 0-->
+                <div class="col-md-12" style="border: solid 1px; border-color: lightblue; margin-top: 10px; padding-bottom: 15px;">
+                    <div style="text-align: center; margin: 5px 0 10px 0;">
+                        <span><strong>Preporučujemo:</strong></span>
+                    </div>
+                    <ul class="list-unstyled" data-bind="foreach: $root.preporuke()">
+                        <li>
+                            <div class="paddedClass">
+                                <div><img class="img img-responsive center-block" data-bind="attr: { src: BHao.rootPath + 'uploads/' + Slike()[0].SlikaThumbIme()}, event: {click: $root.PrikaziAukciju}" style="cursor: pointer;" /></div>
+                                <div class="text-center"><a data-bind="click: $root.PrikaziAukciju, text: Proizvodjac() + ' ' + Model()" title="Detaljnije o aukciji"></a></div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!--/ko-->
+            </div>
+
+        </div>
+    </div>
+</div>

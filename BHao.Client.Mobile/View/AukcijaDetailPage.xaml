@@ -1,0 +1,154 @@
+﻿<Page
+    x:Class="BHao.Client.Mobile.View.AukcijaDetailPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:BHao.Client.Mobile.View"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:valueconverters="using:BHao.Client.Mobile.Converters"
+    DataContext="{Binding DefaultViewModel, RelativeSource={RelativeSource Self}}"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <valueconverters:ImagePathConverter x:Key="ImagePathConverter" />
+        <valueconverters:AukcijaToCijenaKonverter x:Key="AukcijaToCijenaKonverter" />
+        <valueconverters:KomentariToVisibilitiConverter x:Key="KomentariToVisibilityConverter" />
+        <valueconverters:AukcijaNajvecaPonudaConverter x:Key="AukcijaNajvecaPonudaConverter" />
+        <valueconverters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <valueconverters:AukcijaOmoguciKupiOdmahConverter x:Key="AukcijaOmoguciKupiOdmahConverter" />
+    </Page.Resources>
+    <Page.BottomAppBar>
+        <CommandBar>
+            <AppBarButton Icon="Tag" Name="Ponudite" Label="ponudite">
+                <AppBarButton.Flyout>
+                    <Flyout>
+                        <StackPanel>
+                                <TextBox x:Name="IznosPonude" 
+                                         Header="Unesite iznos vaše krajnje ponude"
+                                         InputScope="Number"/>
+                                <Button x:Name="PonudaButton" 
+                                        HorizontalAlignment="Center"
+                                        Content="Kreirajte ponudu" 
+                                        Click="PonudaButton_Click"/>
+                            <StackPanel Visibility="{Binding Aukcija, Converter={StaticResource AukcijaOmoguciKupiOdmahConverter}}">
+                                <TextBlock TextAlignment="Center" 
+                                           Text="ili"
+                                           Style="{ThemeResource BodyTextBlockStyle}"/>
+                                <Button x:Name="KupiOdmahButton" 
+                                        HorizontalAlignment="Center"
+                                        Content="{Binding Aukcija.KupiOdmahString}"
+                                        Click="KupiOdmahButton_Click"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Flyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarButton Icon="Home" Name="Home" Click="Home_Click" Label="početna"/>
+            <AppBarButton Icon="Refresh" Name="Osvjezi" Click="Osvjezi_Click" Label="osvježite"/>
+        </CommandBar>
+    </Page.BottomAppBar>
+    <Page.Transitions>
+        <TransitionCollection>
+            <NavigationThemeTransition>
+                <NavigationThemeTransition.DefaultNavigationTransitionInfo>
+                    <CommonNavigationTransitionInfo IsStaggeringEnabled="True"/>
+                </NavigationThemeTransition.DefaultNavigationTransitionInfo>
+            </NavigationThemeTransition>
+        </TransitionCollection>
+    </Page.Transitions>
+    <Grid Grid.Row="1" x:Name="ContentRoot" >
+        <Pivot x:Uid="Pivot" 
+               x:Name="pivot" 
+               Title="BH AUKCIJE ONLINE" 
+               CommonNavigationTransitionInfo.IsStaggerElement="True">
+            <PivotItem x:Uid="Detaljnije" 
+                       Margin="19,14.5, 0,0" 
+                       Header="detalji" 
+                       DataContext="{Binding Aukcija}">
+                <Grid>
+                    <ScrollViewer>
+                        <StackPanel x:Name="DetaljiPanel">
+                            <TextBlock Text="{Binding Artikal.PuniNaziv}"
+                                   Style="{ThemeResource ListViewItemTextBlockStyle}"
+                                   Margin="0,0,0,0"/>
+                            <TextBlock Text="{Binding ProdavacString}" 
+                                       Style="{ThemeResource BodyTextBlockStyle}"
+                                       Margin="0,5,0,0"/>
+                            <TextBlock Text="{Binding TrajanjeDoString}"
+                                       Style="{ThemeResource BodyTextBlockStyle}"
+                                       Margin="0,5,0,0"/>
+                            <TextBlock Text="{Binding TrenutnaPonudaString}"
+                                       Style="{ThemeResource BodyTextBlockStyle}"
+                                       Margin="0,5,0,0"/>
+                            <TextBlock Text="{Binding NajveciPonudjacString}"
+                                       Style="{ThemeResource BodyTextBlockStyle}"
+                                       Margin="0,5,0,0"/>
+                            <TextBlock Text="{Binding KupiOdmahString}"
+                                       Visibility="{Binding Converter={StaticResource AukcijaOmoguciKupiOdmahConverter}}"
+                                       Style="{ThemeResource BodyTextBlockStyle}"
+                                       Margin="0,5,0,0"/>
+                            <TextBlock Text="{Binding NacinPlacanjaString}"
+                                       Style="{ThemeResource BodyTextBlockStyle}"
+                                       Margin="0,5,0,0"/>
+                            <Border BorderBrush="{ThemeResource PhoneForegroundBrush}" 
+                                    BorderThickness="0,1,0,0" 
+                                    Margin="0,10,0,0">
+                                <TextBlock Text="{Binding DetaljanOpisString}" 
+                                           Margin="0,5,0,0"
+                                           Style="{ThemeResource BodyTextBlockStyle}"/>
+                            </Border>
+                            <Border BorderBrush="{ThemeResource PhoneForegroundBrush}" 
+                                    BorderThickness="0,1,0,0" 
+                                    Margin="0,10,0,0">
+                                <TextBlock Text="{Binding NapomenaString}"
+                                           Margin="0,5,0,0"
+                                           Style="{ThemeResource BodyTextBlockStyle}"/>
+                            </Border>
+                            <ProgressRing x:Uid="myProgressRing" x:Name="myProgressRing" Grid.Row="1" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </PivotItem>
+            <PivotItem x:Uid="Slike" 
+                       Margin="19,14.5, 0,0" 
+                       Header="slike"
+                       DataContext="{Binding Aukcija}">
+                <ListView ItemsSource="{Binding Slike}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="0,0,0,9.5">
+                                <Image Source="{Binding SlikaIme, Converter={StaticResource ImagePathConverter}}" 
+                                       Stretch="UniformToFill"
+                                       Margin="0,0,19,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </PivotItem>
+            <PivotItem x:Uid="OProdavcu" 
+                       Margin="19,14.5, 0,0" 
+                       Header="komentari"
+                       DataContext="{Binding Aukcija.Prodavac}">
+                <StackPanel>
+                    <ListView ItemsSource="{Binding KomentariKorisnika}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,0,0,15">
+                                    <TextBlock Text="{Binding Posiljalac}" 
+                                           Style="{ThemeResource ControlHeaderTextBlockStyle}"/>
+                                    <TextBlock Text="{Binding TextKomentara}" 
+                                           Style="{ThemeResource BodyTextBlockStyle}"
+                                           TextWrapping="WrapWholeWords"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <TextBlock Text="Prodavac trenutno nema komentara." 
+                               Visibility="{Binding KomentariKorisnika, Converter={StaticResource KomentariToVisibilityConverter}}"
+                               Style="{ThemeResource BodyTextBlockStyle}"/>
+                </StackPanel>
+            </PivotItem>
+        </Pivot>
+    </Grid>
+
+</Page>

@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "Aukcije";
+}
+
+@section scripts{
+
+    <script src="~/Binding/Models/AukcijaModel.js"></script>
+    <script src="~/Binding/ViewModels/AukcijeIndexViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.AukcijeIndexViewModel();
+    ko.applyBindings(viewModel);
+}
+
+<br />
+<div class="container" id="index" style="display: none;" data-bind="visible: isLoaded">
+    <div class="row" style="margin-bottom: 25px;">
+        <div class="col-md-3">
+            <select class="form-control" data-bind="options: kategorije,
+                                                        optionsText: 'Naziv',
+                                                        optionsValue: 'Id',
+                                                        value: odabranaKategorijaId,
+                                                        optionsCaption: 'Sve kategorije', event: {change: GetAukcije}"></select>
+        </div>
+        <div class="col-md-9">
+            <div class="input-group">
+                <input type="text" class="form-control pull-right" data-bind="value: stringZaPretragu, valueUpdate: 'afterkeydown', enterkey: GetAukcije" placeholder="Unesite naziv, proizvođač ili model za pretragu..." name="pretraga" id="pretraga">
+                <div class="input-group-btn">
+                    <button class="btn btn-default" data-bind="click: GetAukcije" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h4 data-bind="visible: brojAktivnihAukcija() < 1">Trenutno nema aktivnih aukcija, neke od zadnjih uspješnih aukcija:</h4>
+        </div>
+        <div data-bind="foreach: aukcijeLista">
+            <!--ko if: $root.brojAktivnihAukcija() > 0 -->
+            <div class=" col-md-3" style="padding:5px;">
+                <div class=" col-md-12" data-bind="click: $root.GetDetalji" style="cursor: pointer; border: solid 1px; border-color: lightblue; padding: 10px;">
+                    <div class="col-md-12 center-block" data-bind="with: Aukcija.Slike()[0]">
+                        <img class="img-responsive center-block" style="min-height: 180px; max-height: 180px; margin: 0 auto;" data-bind="attr: {src: BHao.rootPath + 'uploads/' + SlikaIme()}" />
+                    </div>
+                    <div class="col-md-12 center-block">
+                        <h4 class="text-center"><span data-bind="text: Artikal.Proizvodjac() + ' ' + Artikal.Model()"></span></h4>
+                    </div>
+                    <div class="col-md-12 center-block">
+                        <div class="text-center" >Trenutna cijena <span data-bind="text: Aukcija.NajvecaPonuda() ? Aukcija.NajvecaPonuda().toFixed(2): Aukcija.MinimalnaCijena().toFixed(2)"></span> KM</div>
+                        <div class="text-center" >do <span data-bind="date: Aukcija.Zavrsetak, format: 'DD MMM YYYY HH:mm:ss'"></span></div>
+
+                        <div class="text-center"  data-bind="visible: Aukcija.KupiOdmahCijena() > 0 && Aukcija.KupiOdmahCijena() > Aukcija.NajvecaPonuda()"><strong>Kupi odmah za <span data-bind="text: Aukcija.KupiOdmahCijena().toFixed(2)"></span> KM!</strong></div>
+                    </div>
+                </div>
+            </div>
+            <!--/ko-->
+
+            <!--ko if: $root.brojAktivnihAukcija() < 1 -->
+            <div class=" col-md-3" style="padding:5px;">
+                <div class=" col-md-12" style="border: solid 1px; border-color: lightblue; padding: 10px;">
+                    <div class="col-md-12 center-block" data-bind="with: Aukcija.Slike()[0]">
+                        <img class="img-responsive center-block" style="min-height: 180px; max-height: 180px; margin: 0 auto;" data-bind="attr: {src: BHao.rootPath + 'uploads/' + SlikaIme()}" />
+                    </div>
+                    <div class="col-md-12 center-block">
+                        <h4 class="text-center"><span data-bind="text: Artikal.Proizvodjac() + ' ' + Artikal.Model()"></span></h4>
+                    </div>
+                    <div class="col-md-12 center-block">
+                        <div class="text-center">Konačna cijena <span data-bind="text: Aukcija.NajvecaPonuda() ? Aukcija.NajvecaPonuda().toFixed(2): Aukcija.MinimalnaCijena().toFixed(2)"></span> KM</div>
+                        <div class="text-center"><span data-bind="date: Aukcija.Zavrsetak, format: 'DD MMM YYYY HH:mm:ss'"></span></div>
+
+                    </div>
+                </div>
+            </div>
+            <!--/ko-->
+
+            <!-- ko if: $index() % 4 === 3 -->
+            <div class="clearfix"></div>
+            <!-- /ko -->
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "Pregled aukcija";
+    ViewBag.Name = "PregledAukcija";
+}
+
+@section scripts{
+
+    <script src="~/Binding/ViewModels/PregledAukcijaViewModel.js"></script>
+
+}
+
+@section ko_apply {
+
+    var viewModel = new BHao.PregledAukcijaViewModel();
+
+    ko.applyBindingsWithValidation(viewModel,$("#container")[0], {insertMessages: false, messagesOnModified: false, grouping: {deep: true}});
+}
+
+<div id="container" class="container-fluid" style="display: none; margin-top: 25px;" data-bind="visible: isLoaded">
+    <div class="row">
+        <div class="col-md-12" style="border-bottom: solid 1px; border-color: lightblue; padding: 5px;">
+            <ul class="nav nav-pills">
+                <li role="presentation" data-bind="css: { active: dataMode() == false }"><a href="#" data-bind="click: function(){ GetData(false) }">U toku</a></li>
+                <li role="presentation" data-bind="css: { active: dataMode() == true} "><a href="#" data-bind="click: function(){ GetData(true) }">Završene</a></li>
+                <li role="presentation" style="float: right;"><a href="#" data-bind="click: function(){ GetData(dataMode()) }"><span class="glyphicon glyphicon-refresh"></span>&nbsp;Osvježi</a></li>
+
+            </ul>
+        </div>
+        <div class="col-md-12">
+            <div class="text-right">
+                <span data-bind="text: 'Ukupno ' + brojAukcija() + ' aukcija'"></span>
+            </div>
+        </div>
+        @*<div class="col-md-12" >
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-default" data-bind="click: function() { GetData(false) }, css: { active: dataMode() == false} ">U toku</button>
+                <button type="button" class="btn btn-default" data-bind="click: function() { GetData(true) }, css: { active: dataMode() == true} ">Zavrsene</button>
+            </div>
+            <div class="text-right">
+                <span data-bind="text: 'Ukupno ' + brojAukcija() + ' aukcija'"></span>
+            </div>
+        </div>*@
+
+    </div>
+    <div class="row">
+        <div class="col-md-10 col-md-offset-2">
+
+
+            <div data-bind="foreach: aukcije">
+                <div class="col-md-6" style="padding: 20px 40px 20px 40px;">
+                    <div id="slika" class="col-md-3">
+                        <img class="img-thumbnail" data-bind="attr: { src: BHao.rootPath + 'uploads/' + Slike()[0].SlikaThumbIme() }, click: $root.GetDetalji" alt="Slika ovdje!" style="cursor: pointer" />
+                    </div>
+                    <div id="info" class="col-md-9">
+                        <div class="col-md-10">
+                            <h4 data-bind="text: Artikal.Proizvodjac() + ' ' + Artikal.Model() , click: $root.GetDetalji" style="cursor: pointer;"></h4>
+                            <div>
+                                Aukcija <span data-bind="text: Aukcija.Zavrsena() ? 'završena ' : 'traje do '"></span><span data-bind="date: Aukcija.Zavrsetak(), format: 'DD-MMM-YYYY HH:mm:ss'"></span>
+                            </div>
+                            <div>
+                                <span data-bind="text: 'ID aukcije: ' + Aukcija.Id()"></span>
+                            </div>
+                            <div data-bind="if: Prodavac">
+                                <span data-bind="text: 'Prodavac: ' + Prodavac.KorisnickoIme()"></span>
+                            </div>
+                            <div data-bind="if: Kupac">
+                                <span data-bind="text: 'Kupac: ' + Kupac.KorisnickoIme()"></span>
+                            </div>
+                            <div data-bind="if: (Aukcija.Zavrsena() == true && Aukcija.KupacId() == null) ">
+                                <span>Aukcija neuspješna.</span>
+                            </div>
+                            <div data-bind="if: Kupac">
+                                <span data-bind="text: 'Cijena: ' + Aukcija.NajvecaPonuda().toFixed(2)"></span> KM.
+                            </div>
+                            <div>
+                                <span data-bind="text: 'Nacin plaćanja: ' + NacinPlacanja.Opis()"></span>
+                            </div>
+                            <div data-bind="if: Aukcija.Provizija()">
+                                <span data-bind="text: 'Provizija: ' + Aukcija.Provizija().toFixed(2)"></span> KM.
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="btn-group-vertical">
+                                @*<button class="btn btn-sm btn-success" style="margin-bottom: 5px;" data-bind="click: $root.GetDetalji">Detalji aukcije</button>*@
+                                <!--ko if: $root.dataMode() == false -->
+                                <button class="btn btn-sm btn-danger" data-bind="click: $root.UkloniAukciju">Ukloni aukciju</button>
+                                <!--/ko-->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- ko if: $index() % 2 === 1 -->
+                <div class="clearfix"></div>
+                <!-- /ko -->
+            </div>
+        </div>
+        <div class="text-center">
+            <ul class="pagination">
+                <li data-bind="css: { disabled: $root.prethodnaEnabled() == false }, click: function(){ GotoPage(1)} "><a style="min-width: 100px;" href="#"><span></span>Prva</a></li>
+                <li data-bind="css: { disabled: $root.prethodnaEnabled() == false }, click: PrethodnaClick "><a href="#"><span class="glyphicon glyphicon-chevron-left"></span></a></li>
+                <li><span data-bind="text: $root.page() + ' od ' + $root.pages()"></span></li>
+                <li data-bind="css: { disabled: $root.narednaEnabled() == false }, click: NarednaClick"><a href="#"><span class="glyphicon glyphicon-chevron-right"></span></a></li>
+                <li data-bind="css: { disabled: $root.narednaEnabled() == false }, click: function(){ GotoPage($root.pages())}"><a style="min-width: 100px;" href="#"><span></span>Poslednja</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
